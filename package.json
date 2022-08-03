@@ -1,0 +1,17 @@
+{
+  "name": "declutter",
+  "version": "1.0.0",
+  "description": "Reads a gpx file and reduces the number of points.",
+  "main": "js/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node js/index.js"
+  },
+  "author": "dave gardner",
+  "license": "ISC",
+  "dependencies": {
+    "@tmcw/togeojson": "^5.2.1",
+    "@turf/turf": "^6.5.0",
+    "xmldom": "^0.6.0"
+  }
+}
