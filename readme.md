@@ -6,7 +6,7 @@ OpenCPN can export track and route files as Google GPX (XML) files. To make thes
 
 - Convert to JSON
 - Simplify the files as they contain way too many unnecessary points.
-- Only discard Waypoints (why does OpenCPN include Waypoint data in Route files?)
+- Discard Waypoints (why does OpenCPN include Waypoint data in Route files?)
 - Combine multiple GPX files (some route, some track) into a single file.
 
 Declutter uses various libraries to accomplish these tasks.
