@@ -5,7 +5,9 @@
   "main": "js/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node js/index.js"
+    "start": "node js/index.js",
+    "debug": "node js/index.js assets/2022-06-12.gpx rubbish.geojson"
+
   },
   "author": "dave gardner",
   "license": "ISC",
