@@ -4,54 +4,67 @@ const path = require('path');
 const tj = require('@tmcw/togeojson');
 const DOMParser = require("xmldom").DOMParser;
 const turf = require('@turf/turf');
+const { exit } = require('process');
+const argc = process.argv.length;
 
+if (argc < 4 || process.argv[2].startsWith("-h") || process.argv[2].startsWith("--help")) {
+  console.log("Converts any number of gpx input files to a single geojson output.")
+  console.log("Usage:");
+  console.log("  npm index.js input1.gpx input2.gpx ... output.geojson");
+  exit(1);
+}
 
 // Array of source files
-const inputFiles = [
-  "/home/dave/Anjea/Routes/all.gpx",
-  "/home/dave/Anjea/Routes/Track to Tanga.gpx"
-];
+const inputFiles = process.argv.slice(2, argc - 1);
+// last value is output filename
+const outputFilename = process.argv[argc - 1];
 
-// TODO: some files, such as all.gpx, contain multiple routes (features).
-// These need to be joined together into a single feature because
-// mapbox will not accept multiple features.
+// Tell what's going to happen
+console.log("Converting and consolidating the following files:")
+inputFiles.forEach(fname => console.log("   " + fname));
+console.log("into the output file '%s'", outputFilename);
 
+const allFeatures = [];
+var simple;
+
+// process all input files
+const startTime = Date.now();
 inputFiles.forEach(fix);
 
 function fix(inputFilename) {
 
-  // timing
-  const startTime = Date.now();
-
-  // Derive output filename by changing the extension and writing to current directory
-  const outputFilenameObject = path.parse(inputFilename);
-  outputFilenameObject.ext = ".geojson";
-  outputFilenameObject.base = null;
-  outputFilenameObject.dir = ".";
-  const outputFilename = path.format(outputFilenameObject);
-
-  console.log("Converting %s ...", inputFilename);
+  console.log("\r\nConverting %s ...", inputFilename);
 
   // Read the source into an XML object
   const gpx = new DOMParser().parseFromString(fs.readFileSync(inputFilename, "utf8"));
 
-  // Convert it
+  // Convert it to geojson
   const geo = tj.gpx(gpx);
 
   // Simplify it
-  const simple = turf.simplify(geo, { "tolerance": 0.0001, "highQuality": true });
+  simple = turf.simplify(geo, { "tolerance": 0.0001, "highQuality": true });
 
-  // overwrite any existing file
-  fs.writeFile(outputFilename, JSON.stringify(simple, null, null), { encoding: 'utf8', flag: 'w' },
-    function (err) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("JSON saved to " + outputFilename + " in " + (Date.now() - startTime) + " ms.");
-      }
-    });
-
+  // copy only the LineString Features
+  simple.features.forEach( feature => {
+    if(feature.geometry.type == "LineString")
+    allFeatures.push(feature)
+  });
 }
+
+// replace the features for the last simplified file with the array of all features
+simple.features = allFeatures;
+
+// and overwrite any existing output file
+fs.writeFile(outputFilename, JSON.stringify(simple, null, null), { encoding: 'utf8', flag: 'w' },
+  function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("geojson saved to " + outputFilename + " in " + (Date.now() - startTime) + " ms.");
+    }
+  });
+
+console.log("Finished.");
 
 
 
