@@ -7,15 +7,17 @@ const turf = require('@turf/turf');
 const { exit } = require('process');
 const argc = process.argv.length;
 
-if (argc < 4 || process.argv[2].startsWith("-h") || process.argv[2].startsWith("--help")) {
+if (argc < 5 || process.argv[2].startsWith("-h") || process.argv[2].startsWith("--help")) {
   console.log("Converts any number of gpx input files to a single geojson output.")
   console.log("Usage:");
-  console.log("  npm index.js input1.gpx input2.gpx ... output.geojson");
+  console.log("  npm index.js tolerance input1.gpx input2.gpx ... output.geojson");
   exit(1);
 }
 
+// first value is tolerance
+const tolerance = Number(process.argv[2]);
 // Array of source files
-const inputFiles = process.argv.slice(2, argc - 1);
+const inputFiles = process.argv.slice(3, argc - 1);
 // last value is output filename
 const outputFilename = process.argv[argc - 1];
 
@@ -42,7 +44,12 @@ function fix(inputFilename) {
   const geo = tj.gpx(gpx);
 
   // Simplify it
-  simple = turf.simplify(geo, { "tolerance": 0.0001, "highQuality": true });
+  simple = turf.simplify(geo, { "tolerance": tolerance, "highQuality": true });
+
+  // remove times
+  simple.features.forEach(feature => {
+    feature.properties.coordinateProperties = {}
+  });
 
   // copy only the LineString Features
   simple.features.forEach( feature => {
