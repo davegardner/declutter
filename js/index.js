@@ -10,7 +10,8 @@ const argc = process.argv.length;
 if (argc < 5 || process.argv[2].startsWith("-h") || process.argv[2].startsWith("--help")) {
   console.log("Converts any number of gpx input files to a single geojson output.")
   console.log("Usage:");
-  console.log("  npm index.js tolerance input1.gpx input2.gpx ... output.geojson");
+  console.log("  node js/index.js tolerance input1.gpx input2.gpx ... output.geojson");
+  console.log("where tolerance is a small number (try 0.001).")
   exit(1);
 }
 
